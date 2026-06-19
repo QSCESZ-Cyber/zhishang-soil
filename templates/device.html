@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/static/logo.png">
+    <title>设备简介 - 知墒土壤监测系统</title>
+    <style>
+        :root {
+            --primary-blue: #4A90E2;
+            --primary-green: #4CAF50;
+            --light-bg: #f5ece4;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-color: #333;
+            --text-secondary: #666;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            z-index: 999;
+            box-shadow: var(--shadow);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .logo-text .subtitle {
+            font-size: 14px;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 14px;
+            color: var(--text-color);
+            text-decoration: none;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-links a.active {
+            color: var(--primary-blue);
+        }
+
+        .nav-links a.active::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-blue);
+        }
+
+        .logout-btn {
+            padding: 5px 12px;
+            border: 1px solid #d93025;
+            background: #fff;
+            color: #d93025;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #fff5f5;
+        }
+
+        /* 主内容区布局 - 采用背景图和卡片式布局 */
+        .hero {
+            width: 100%;
+            position: relative;
+            padding-top: 70px;
+            min-height: 100vh;
+        }
+
+        .hero-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .hero-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hero-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 32px;
+            color: #222;
+            margin-bottom: 8px;
+        }
+
+        .page-title p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        /* 卡片布局  */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: var(--primary-blue);
+            margin-bottom: 12px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card h2::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background-color: var(--primary-green);
+            border-radius: 2px;
+        }
+
+        .card p, .card ul {
+            line-height: 1.6;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .card ul {
+            padding-left: 20px;
+        }
+
+        .highlight {
+            color: var(--primary-green);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="../static/logo.jpg" alt="logo">
+            <span class="logo-text">知墒 <span class="subtitle">土壤含水率监测系统</span></span>
+        </div>
+        <div class="nav-links">
+            <a href="/home_page">首页</a>
+            <a href="/device_selector">我的设备</a>
+            <a href="/add_device">添加设备</a>
+            <a href="/device" class="active">设备简介</a>
+            <a href="/my">个人中心</a>
+            <button class="logout-btn" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+
+    <div class="hero">
+        <div class="hero-bg">
+            <img src="../static/soil-bg.png" alt="背景">
+        </div>
+        <div class="hero-content">
+            <div class="page-title">
+                <h1>设备简介</h1>
+                <p>知墒土壤含水率监测系统</p>
+            </div>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h2>设备概述</h2>
+                    <p>知墒土壤含水率监测系统是一款基于电容式介电常数原理的智能监测设备。系统采用<span class="highlight">NE555多谐振荡测频方案</span>，集成高精度NTC温度补偿模块与ESP8266 Wi-Fi无线传输模块，能够实时、精准地采集土壤含水率与温度数据，并将数据上传至云端服务器。</p>
+                </div>
+
+                <div class="card">
+                    <h2>核心功能</h2>
+                    <ul>
+                        <li><span class="highlight">土壤含水率精准测量</span></li>
+                        <li><span class="highlight">实时温度采集与补偿</span></li>
+                        <li><span class="highlight">Wi-Fi无线数据上传</span></li>
+                        <li><span class="highlight">太阳能低功耗运行</span></li>
+                        <li><span class="highlight">多土壤类型自适应</span></li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h2>硬件组成</h2>
+                    <ul>
+                        <li><span class="highlight">主控单元</span>：STM32系列微控制器</li>
+                        <li><span class="highlight">振荡电路</span>：NE555定时器芯片</li>
+                        <li><span class="highlight">温度传感器</span>：NTC热敏电阻</li>
+                        <li><span class="highlight">无线模块</span>：ESP8266 Wi-Fi模块</li>
+                        <li><span class="highlight">供电单元</span>：太阳能板与锂电池</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h2>工作原理</h2>
+                    <p>设备通过探针插入土壤，土壤的介电常数随含水率变化而改变，导致振荡电路的输出频率发生变化。STM32主控芯片通过测量频率变化，结合NTC传感器采集的温度数据，利用内置的温度补偿算法，精确计算出当前土壤的含水率值。</p>
+                </div>
+
+                <div class="card">
+                    <h2>技术参数</h2>
+                    <ul>
+                        <li><span class="highlight">测量范围</span>：含水率 0～100%</li>
+                        <li><span class="highlight">测量精度</span>：含水率 ±2%</li>
+                        <li><span class="highlight">供电方式</span>：太阳能 + 锂电池</li>
+                        <li><span class="highlight">传输方式</span>：Wi-Fi (ESP8266)</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h2>应用场景</h2>
+                    <ul>
+                        <li><span class="highlight">大田灌溉</span>：指导精准灌溉</li>
+                        <li><span class="highlight">温室种植</span>：精细化管理</li>
+                        <li><span class="highlight">园林养护</span>：科学浇水</li>
+                        <li><span class="highlight">生态监测</span>：长期监测</li>
+                        <li><span class="highlight">科研试验</span>：数据支持</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+function logout() {
+    if(confirm('确定退出登录？')){
+        location.href = '/logout';
+    }
+}
+</script>
+
+</body>
+</html>

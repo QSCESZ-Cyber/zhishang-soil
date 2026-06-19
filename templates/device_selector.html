@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的设备 - 知墒土壤监测系统</title>
+  <link rel="shortcut icon" href="/static/logo.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<style>
+:root {
+  --blue: #4A90E2;
+  --green: #4CAF50;
+  --red: #d93025;
+  --card: rgba(255,255,255,0.97);
+  --text: #222;
+  --text-sub: #555;
+  --border: #ddd;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+body {
+  overflow-x: hidden;
+}
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  z-index: 999;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+}
+.logo-text {
+  font-size: 22px;
+  font-weight: bold;
+}
+.logo-text .subtitle {
+  font-size: 14px;
+  color: #666;
+  font-weight: normal;
+}
+.nav-links {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+.nav-links a {
+  font-size: 14px;
+  color: #333;
+  text-decoration: none;
+}
+.nav-links a.active {
+  color: var(--blue);
+  font-weight: 500;
+}
+.logout-btn {
+  padding: 5px 12px;
+  border: 1px solid var(--red);
+  background: #fff;
+  color: var(--red);
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.hero {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  padding-top: 90px;
+  padding-bottom: 40px;
+}
+.hero-bg {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+.hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.page-title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.page-title h1 {
+  font-size: 28px;
+  color: #222;
+  margin-bottom: 6px;
+}
+.page-title p {
+  color: #555;
+  font-size: 15px;
+}
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+  margin-bottom: 20px;
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--blue);
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.refresh-tip {
+  font-size: 12px;
+  color: #888;
+  font-weight: normal;
+}
+.device-select {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.device-select label {
+  font-size: 14px;
+  color: #333;
+}
+.device-select select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+}
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.data-item {
+  text-align: center;
+  padding: 16px;
+  border-radius: 10px;
+  background: #fafafa;
+}
+.data-item .label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 6px;
+}
+.data-item .value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--blue);
+  margin-bottom: 4px;
+}
+.data-item .unit {
+  font-size: 13px;
+  color: #888;
+}
+.data-item.humid .value {
+  color: var(--green);
+}
+.chart-wrapper {
+  width: 100%;
+  height: 280px;
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+}
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+.history-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.history-filter button {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.history-filter button.active {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+.table-box {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 12px;
+  text-align: center;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+th {
+  background: #f5f5f5;
+  color: #333;
+  font-weight: 600;
+}
+td {
+  color: #555;
+}
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+#sortBtn {
+  padding: 8px 14px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+#sortBtn.active {
+  background: #4caf50;
+  color: #fff;
+  border-color: #4caf50;
+}
+.search-bar {
+  width: 100%;
+  margin-bottom: 12px;
+}
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+.search-input:focus {
+  border-color: var(--blue);
+}
+.device-scroll {
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+.device-item {
+  padding: 12px 20px;
+  margin: 10px 0;
+  height: 50px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 150ms ease-in;
+  border-left: 4px solid #4caf50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.device-item:hover {
+  background: #f1f1f1;
+  transform: scale(1.01);
+}
+.device-item h3 {
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+}
+.device-item p {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0;
+}
+.delete-x {
+  font-size: 18px;
+  color: #888;
+  cursor: pointer;
+  user-select: none;
+  padding: 0 6px;
+}
+.delete-x:hover {
+  color: #ff4444;
+}
+.edit-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #4A90E2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 6px;
+}
+.edit-btn:hover {
+  background: #357abd;
+}
+</style>
+<div id="droughtModal" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+">
+    <div style="
+        background: #fff;
+        border-radius: 12px;
+        padding: 30px 40px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        max-width: 400px;
+    ">
+        <h3 style="color: #d93025; margin: 0 0 16px; font-size: 20px;">土壤干旱预警</h3>
+        <p style="color: #333; margin: 0 0 24px; font-size: 16px; line-height: 1.6;">
+            当前土壤含水率已低于 15%，请及时进行灌溉。
+        </p>
+        <button onclick="closeDroughtModal()" style="
+            background: #4A90E2;
+            color: #fff;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+        ">我知道了</button>
+    </div>
+</div>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="logo">
+    <img src="/static/logo.jpg" alt="logo">
+    <span class="logo-text">知墒 <span class="subtitle">土壤监测系统</span></span>
+  </div>
+  <div class="nav-links">
+    <a href="/home_page">首页</a>
+    <a href="/device_selector" class="active">我的设备</a>
+    <a href="/add_device">添加设备</a>
+    <a href="/device">设备简介</a>
+    <a href="/my">个人中心</a>
+    <button class="logout-btn" onclick="logout()">退出登录</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-bg">
+    <img src="/static/soil-bg.png" alt="背景">
+  </div>
+  <div class="container">
+
+    <div class="page-title">
+      <h1>我的设备</h1>
+      <p>设备管理、实时数据监测 & 历史趋势分析</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">设备列表管理</div>
+      <div class="search-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="搜索设备名称 / ID..." oninput="filterDevices()">
+      </div>
+      <div class="toolbar">
+        <button id="sortBtn">管理</button>
+      </div>
+      <div class="device-scroll" id="deviceList"></div>
+    </div>
+
+    <div class="card">
+      <div class="device-select">
+        <label>当前监测设备：</label>
+        <select id="deviceSelect" onchange="selectDevice(this.value)"></select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        实时监测数据
+        <span class="refresh-tip" id="updateTime">加载中...</span>
+      </div>
+      <div class="data-grid">
+        <div class="data-item">
+          <div class="label">土壤温度</div>
+          <div class="value" id="temp">--</div>
+          <div class="unit">℃</div>
+        </div>
+        <div class="data-item humid">
+          <div class="label">土壤含水率</div>
+          <div class="value" id="humid">--</div>
+          <div class="unit">%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">实时趋势</div>
+      <div class="chart-wrapper">
+        <canvas id="realChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">历史统计（按天）</div>
+      <div class="history-filter">
+        <button class="active" data-day="7">近7天</button>
+        <button data-day="30">近30天</button>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="historyChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">最近数据记录</div>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>温度(℃)</th>
+              <th>含水率(%)</th>
+              <th>设备状态</th>
+            </tr>
+          </thead>
+          <tbody id="dataTable">
+            <tr><td colspan="4">暂无数据</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="editModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;display:none;">
+  <div style="width:380px;background:#fff;border-radius:12px;padding:24px;box-shadow:0 5px 20px rgba(0,0,0,0.15);">
+    <h3 style="margin-bottom:18px;font-size:18px;color:#222;">修改设备信息</h3>
+    <input type="hidden" id="oldDeviceId">
+
+    <div style="margin-bottom:14px;">
+      <label style="font-size:14px;color:#333;display:block;margin-bottom:6px;">设备编号</label>
+      <input id="editDeviceId" class="search-input" style="width:100%;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:14px;color:#333;display:block;margin-bottom:6px;">设备名称</label>
+      <input id="editDeviceName" class="search-input" style="width:100%;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:14px;color:#333;display:block;margin-bottom:6px;">安装位置</label>
+      <input id="editLocation" class="search-input" style="width:100%;">
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:24px;">
+      <button onclick="saveDeviceEdit()" style="flex:1;background:#4A90E2;color:#fff;border:none;padding:9px 0;border-radius:6px;cursor:pointer;">保存</button>
+      <button onclick="closeEditModal()" style="flex:1;background:#f1f1f1;color:#333;border:none;padding:9px 0;border-radius:6px;cursor:pointer;">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let realChart, historyChart;
+let currentDeviceId = null;
+let sortEnabled = false;
+let sortable = null;
+let allDevices = [];
+
+window.onload = function () {
+  initCharts();
+  loadDevices();
+  setInterval(loadRealData, 60000);
+};
+
+function initCharts() {
+  const ctx1 = document.getElementById('realChart').getContext('2d');
+  realChart = new Chart(ctx1, {
+    type: 'line',
+    data: { labels: [], datasets: [
+      { label: '温度', borderColor: '#4A90E2', data: [], tension: 0.3 },
+      { label: '含水率', borderColor: '#4CAF50', data: [], tension: 0.3 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  const ctx2 = document.getElementById('historyChart').getContext('2d');
+  historyChart = new Chart(ctx2, {
+    type: 'bar',
+    data: { labels: [], datasets: [
+      { label: '平均温度', backgroundColor: '#4A90E2', data: [] },
+      { label: '平均含水率', backgroundColor: '#4CAF50', data: [] }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+async function loadDevices() {
+  const r = await fetch('/api/devices');
+  allDevices = await r.json();
+  renderDevices(allDevices);
+}
+
+function renderDevices(list) {
+  const sel = document.getElementById('deviceSelect');
+  const box = document.getElementById('deviceList');
+  sel.innerHTML = '';
+  box.innerHTML = '';
+
+  if (list.length === 0) {
+    box.innerHTML = '<div style="text-align:center;padding:20px;">暂无设备</div>';
+    return;
+  }
+
+  list.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d.device_id;
+    opt.innerText = `${d.device_name} (${d.device_id})`;
+    sel.appendChild(opt);
+
+    const item = document.createElement('div');
+    item.className = 'device-item';
+    item.dataset.id = d.device_id;
+    item.innerHTML = `
+      <div><h3>${d.device_name}</h3><p>ID: ${d.device_id} 位置: ${d.location || '-'}</p></div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="edit-btn" onclick="openEditModal(event,'${d.device_id}')" style="display:${sortEnabled?'inline-block':'none'}">修改</button>
+        <span class="delete-x" onclick="del(event,'${d.device_id}')" style="display:${sortEnabled?'inline-block':'none'}">✕</span>
+      </div>
+    `;
+    item.onclick = () => selectDevice(d.device_id);
+    box.appendChild(item);
+  });
+
+  if (!sortable) {
+    sortable = new Sortable(box, { animation:150, handle:'.device-item', disabled:true });
+  }
+
+  if (!currentDeviceId) currentDeviceId = list[0].device_id;
+  selectDevice(currentDeviceId);
+}
+
+function openEditModal(e, deviceId) {
+  e.stopPropagation();
+  let dev = allDevices.find(d => d.device_id === deviceId);
+  if (!dev) return;
+
+  document.getElementById('oldDeviceId').value = dev.device_id;
+  document.getElementById('editDeviceId').value = dev.device_id;
+  document.getElementById('editDeviceName').value = dev.device_name;
+  document.getElementById('editLocation').value = dev.location || '';
+
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').style.display = 'none';
+}
+
+async function saveDeviceEdit() {
+  let oldId = document.getElementById('oldDeviceId').value;
+  let newId = document.getElementById('editDeviceId').value.trim();
+  let name = document.getElementById('editDeviceName').value.trim();
+  let loc = document.getElementById('editLocation').value.trim();
+
+  if (!newId || !name) {
+    alert('设备编号和名称不能为空');
+    return;
+  }
+
+  let res = await fetch(`/api/devices/${oldId}/update`, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({
+      device_id: newId,
+      device_name: name,
+      location: loc
+    })
+  });
+
+  let ret = await res.json();
+  if (ret.ok) {
+    alert('修改成功');
+    closeEditModal();
+    loadDevices();
+  } else {
+    alert('修改失败');
+  }
+}
+
+function filterDevices() {
+  const kw = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allDevices.filter(d =>
+    d.device_name.toLowerCase().includes(kw) || d.device_id.toLowerCase().includes(kw)
+  );
+  renderDevices(filtered);
+}
+
+async function selectDevice(id) {
+  currentDeviceId = id;
+  document.getElementById('deviceSelect').value = id;
+  clearChartAndTable();
+  loadRealData();
+  loadHistory();
+}
+
+function clearChartAndTable(){
+  realChart.data.labels = [];
+  realChart.data.datasets[0].data = [];
+  realChart.data.datasets[1].data = [];
+  realChart.update();
+
+  historyChart.data.labels = [];
+  historyChart.data.datasets[0].data = [];
+  historyChart.data.datasets[1].data = [];
+  historyChart.update();
+
+  document.getElementById('temp').innerText = '--';
+  document.getElementById('humid').innerText = '--';
+  document.getElementById('updateTime').innerText = '暂无数据';
+  document.getElementById('dataTable').innerHTML = '<tr><td colspan="4">暂无数据</td></tr>';
+}
+
+async function loadRealData() {
+  if (!currentDeviceId) return;
+  const d = await (await fetch(`/api/devices/${currentDeviceId}/realtime`)).json();
+
+  if (!d || d.timestamp === "无数据") {
+    clearChartAndTable();
+    return;
+  }
+
+  document.getElementById('temp').innerText = d.temperature.toFixed(1);
+  document.getElementById('humid').innerText = d.humidity.toFixed(1);
+  document.getElementById('updateTime').innerText = '更新于 ' + new Date().toLocaleTimeString();
+
+  // ========== 核心：湿度低于15% 触发居中弹窗 ==========
+  if (d.humidity < 15) {
+      openDroughtModal(); // 弹出带“我知道了”按钮的弹窗
+  } else {
+      closeDroughtModal(); // 正常则关闭弹窗
+  }
+  // ==================================================
+
+  const his = await (await fetch(`/api/devices/${currentDeviceId}/history?limit=20`)).json();
+  if(!Array.isArray(his) || his.length === 0){
+    clearChartAndTable();
+    return;
+  }
+
+  realChart.data.labels = his.map(i => i.timestamp.substr(11,5));
+  realChart.data.datasets[0].data = his.map(i => i.temperature);
+  realChart.data.datasets[1].data = his.map(i => i.humidity);
+  realChart.update();
+
+  document.getElementById('dataTable').innerHTML = his.map(i => `
+  <tr>
+    <td>${i.timestamp}</td>
+    <td>${i.temperature.toFixed(1)}</td>
+    <td>${i.humidity.toFixed(1)}</td>
+    <td style="color:#0a0">正常</td>
+  </tr>`).join('');
+}
+
+async function loadHistory(day = 7) {
+  if (!currentDeviceId) return;
+  const list = await (await fetch(`/api/device/history/day/${currentDeviceId}?days=${day}`)).json();
+  if(!Array.isArray(list) || list.length === 0){
+    historyChart.data.labels = [];
+    historyChart.data.datasets[0].data = [];
+    historyChart.data.datasets[1].data = [];
+    historyChart.update();
+    return;
+  }
+  historyChart.data.labels = list.map(i => i.day);
+  historyChart.data.datasets[0].data = list.map(i => i.t_avg);
+  historyChart.data.datasets[1].data = list.map(i => i.h_avg);
+  historyChart.update();
+}
+
+document.querySelectorAll('.history-filter button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('.history-filter button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    loadHistory(b.dataset.day);
+  };
+});
+
+document.getElementById('sortBtn').onclick = function () {
+  sortEnabled = !sortEnabled;
+  this.classList.toggle('active', sortEnabled);
+  this.innerText = sortEnabled ? '退出管理' : '管理';
+  sortable.option('disabled', !sortEnabled);
+  renderDevices(allDevices);
+};
+
+async function del(e, id) {
+  e.stopPropagation();
+  if (!confirm('确定删除？')) return;
+  await fetch(`/api/devices/${id}`, { method:'DELETE' });
+  loadDevices();
+}
+
+function logout() {
+  if (confirm('确定退出登录？')) location.href = '/logout';
+}
+function openDroughtModal() {
+    document.getElementById('droughtModal').style.display = 'flex';
+}
+
+function closeDroughtModal() {
+    document.getElementById('droughtModal').style.display = 'none';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知墒</title>
+    <link rel="stylesheet" href="../static/style1.css">
+    <link rel="stylesheet" href="../static/iconfont/iconfont.css">
+    <link rel="shortcut icon" href="../static/logo.png">
+    <style>
+        .toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 28px;
+            background: #4CAF50;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .toast.show {
+            opacity: 1;
+            top: 40px;
+        }
+        .toast.error {
+            background: #d93025;
+        }
+    </style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<div class="container" id="container">
+    <div class="form-container sign-up-container">
+        <form id="registerForm">
+            <h1>用户注册</h1>
+            <div class="social-container">
+                <a href="#" class="social"><i class="iconfont icon-qq"></i></a>
+                <a href="#" class="social"><i class="iconfont icon-weixin"></i></a>
+            </div>
+            <span>您可以选择以上几种方式注册一个您的账户!</span>
+            <input type="tel" id="phone" name="phone" placeholder="手机号" required>
+            <button type="button" onclick="sendCode()">发送验证码</button>
+            <input type="text" id="code" name="code" placeholder="验证码" required>
+            <input type="password" name="password" placeholder="设置密码" required>
+            <button type="submit">注册</button>
+        </form>
+
+        <script>
+            function showToast(msg, isError = false) {
+                const toast = document.getElementById('toast');
+                toast.innerText = msg;
+                toast.className = 'toast ' + (isError ? 'error' : '');
+                setTimeout(() => { toast.classList.add('show'); }, 10);
+                setTimeout(() => { toast.classList.remove('show'); }, 2000);
+            }
+
+            function sendCode() {
+                const phone = document.getElementById('phone').value;
+                if (!phone.trim()) {
+                    showToast("请先填写手机号！", true);
+                    return;
+                }
+                fetch('/send_code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `phone=${encodeURIComponent(phone)}`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    showToast(data.msg);
+                })
+                .catch(err => {
+                    showToast("发送失败", true);
+                });
+            }
+
+            document.getElementById('registerForm').addEventListener('submit', async function(e){
+                e.preventDefault();
+                let formData = new FormData(this);
+                let res = await fetch('/register', { method: 'POST', body: formData });
+                let data = await res.json();
+                showToast(data.msg, !data.ok);
+                if (data.ok) this.reset();
+            });
+        </script>
+    </div>
+
+    <div class="form-container sing-in-container">
+        <form id="loginForm">
+            <h1>用户登陆</h1>
+            <div class="social-container">
+                <a href="#" class="social"><i class="iconfont icon-qq"></i></a>
+                <a href="#" class="social"><i class="iconfont icon-weixin"></i></a>
+            </div>
+            <span>您可以选择以上几种方式登陆您的账户!</span>
+            <input type="tel" name="phone" placeholder="手机号" required>
+            <input type="password" name="password" placeholder="密码" required>
+            <a href="/forget_password">忘记密码?</a>
+            <button type="submit">登录</button>
+        </form>
+
+        <script>
+            document.getElementById('loginForm').addEventListener('submit', async function(e){
+                e.preventDefault();
+                let formData = new FormData(this);
+                let res = await fetch('/login', { method: 'POST', body: formData });
+                let data = await res.json();
+
+                showToast(data.msg, !data.ok);
+
+                if (data.ok) {
+                    setTimeout(() => {
+                        location.href = '/home_page';
+                    }, 150);
+                }
+            });
+        </script>
+    </div>
+
+    <div class="overlay-container">
+        <div class="overlay">
+            <div class="overlay-pannel overlay-left">
+                <h1>已有账号?</h1>
+                <p>亲爱的快快点我去进行登陆吧。</p>
+                <button class="ghost" id="signIn">登陆</button>
+            </div>
+            <div class="overlay-pannel overlay-right">
+                <h1>没有帐号？</h1>
+                <p>点击注册去注册一个属于你的账号吧。</p>
+                <button class="ghost" id="signUp">注册</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../static/index.js"></script>
+</body>
+</html>

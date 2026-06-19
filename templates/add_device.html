@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加设备 - 知墒土壤监测系统</title>
+    <link rel="shortcut icon" href="/static/logo.png">
+    <style>
+        :root {
+            --blue: #4A90E2;
+            --green: #4CAF50;
+            --red: #d93025;
+            --card: rgba(255,255,255,0.97);
+            --text: #222;
+            --text-sub: #555;
+            --border: #ddd;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+        body {
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            z-index: 999;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo img {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+        }
+        .logo-text {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .logo-text .subtitle {
+            font-size: 14px;
+            color: #666;
+            font-weight: normal;
+        }
+        .nav-links {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+        }
+        .nav-links a {
+            font-size: 14px;
+            color: #333;
+            text-decoration: none;
+        }
+        .nav-links a.active {
+            color: var(--blue);
+            font-weight: 500;
+        }
+        .logout-btn {
+            padding: 5px 12px;
+            border: 1px solid var(--red);
+            background: #fff;
+            color: var(--red);
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .hero {
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+            padding-top: 90px;
+            padding-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .hero-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .form-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .form-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 30px;
+        }
+        .form-item {
+            margin-bottom: 20px;
+        }
+        .form-item label {
+            display: block;
+            font-size: 15px;
+            color: var(--text);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-item input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .form-item input:focus {
+            outline: none;
+            border-color: var(--blue);
+        }
+        .form-item .tip {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: var(--green);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .submit-btn:hover {
+            background: #388E3C;
+        }
+
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            background: var(--green);
+            color: #fff;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            opacity: 1;
+            top: 90px;
+        }
+        .toast.error {
+            background: var(--red);
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="logo">
+        <img src="/static/logo.jpg" alt="logo">
+        <span class="logo-text">知墒 <span class="subtitle">土壤监测系统</span></span>
+    </div>
+    <div class="nav-links">
+        <a href="/home_page">首页</a>
+        <a href="/device_selector">我的设备</a>
+        <a href="/add_device" class="active">添加设备</a>
+        <a href="/device" >设备简介</a>
+        <a href="/my">个人中心</a>
+        <button class="logout-btn" onclick="logout()">退出登录</button>
+    </div>
+</div>
+
+<!-- 表单页面 -->
+<div class="hero">
+    <div class="hero-bg">
+        <img src="/static/soil-bg.png" alt="背景">
+    </div>
+
+    <div class="form-card">
+        <div class="form-title">手动添加设备</div>
+
+        <form id="addForm">
+            <div class="form-item">
+                <label>设备编号</label>
+                <input type="text" name="device_id" placeholder="例如：DEVICE001" required>
+                <div class="tip">设备编号由字母和数字组成</div>
+            </div>
+            <div class="form-item">
+                <label>设备名称</label>
+                <input type="text" name="device_name" placeholder="例如：试验田A区设备" required>
+                <div class="tip">自定义设备名称，方便识别</div>
+            </div>
+            <div class="form-item">
+                <label>设备位置</label>
+                <input type="text" name="location" placeholder="例如：试验田A区1号地块" required>
+                <div class="tip">填写设备安装位置，便于管理</div>
+            </div>
+            <button type="submit" class="submit-btn">保存添加</button>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function logout() {
+    if(confirm('确定退出登录？')){
+        location.href = '/logout';
+    }
+}
+
+function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = 'toast ' + (isError ? 'error' : '');
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+document.getElementById('addForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    try {
+        const res = await fetch('/do_add_device', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await res.json();
+
+        if (result.ok) {
+            showToast('✅ 设备添加成功！');
+            e.target.reset();
+        } else {
+            showToast('❌ 添加失败：' + (result.msg || '未知错误'), true);
+        }
+    } catch (err) {
+        showToast('❌ 网络错误', true);
+    }
+});
+</script>
+</body>
+</html>

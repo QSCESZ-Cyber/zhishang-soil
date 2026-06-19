@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知墒 - 土壤监测</title>
+  <link rel="shortcut icon" href="/static/logo.png">
+  <style>
+    :root {
+      --blue: #4A90E2;
+      --green: #4CAF50;
+      --red: #f44336;
+      --card: rgba(255,255,255,0.97);
+      --text: #222;
+      --text-sub: #555;
+      --border: #ddd;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+    body {
+      overflow-x: hidden;
+    }
+
+    /* 导航栏 */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      z-index: 999;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo img {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+    }
+    .logo-text {
+      font-size: 22px;
+      font-weight: bold;
+    }
+    .logo-text .subtitle {
+      font-size: 14px;
+      color: #666;
+      font-weight: normal;
+    }
+    .nav-links {
+      display: flex;
+      gap: 22px;
+      align-items: center;
+    }
+    .nav-links a {
+      font-size: 14px;
+      color: #333;
+      text-decoration: none;
+    }
+    .nav-links a.active {
+      color: var(--blue);
+      font-weight: 500;
+    }
+    .logout-btn {
+      padding: 5px 12px;
+      border: 1px solid var(--red);
+      background: #fff;
+      color: var(--red);
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* 背景 */
+    .hero {
+      width: 100%;
+      min-height: 100vh;
+      position: relative;
+      padding-top: 100px;
+      padding-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-bg {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    .hero-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hero-content {
+      width: 100%;
+      max-width: 1000px;
+      text-align: center;
+      padding: 0 20px;
+    }
+    .hero-content h1 {
+      font-size: 32px;
+      color: #222;
+      margin-bottom: 12px;
+    }
+    .desc {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 40px;
+    }
+
+    .cards-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: white;
+      width: 280px;
+      padding: 30px 20px;
+      border-radius: 16px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .card-icon {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-icon.blue {
+      background: #E3F2FD;
+    }
+    .card-icon.green {
+      background: #E8F5E9;
+    }
+    .card h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #222;
+    }
+    .card p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-blue {
+      background: var(--blue);
+    }
+    .btn-green {
+      background: var(--green);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="logo">
+      <img src="/static/logo.jpg" alt="logo">
+      <span class="logo-text">知墒 <span class="subtitle">土壤含水率监测系统</span></span>
+    </div>
+    <div class="nav-links">
+      <a href="/home_page" class="active">首页</a>
+      <a href="/device_selector">我的设备</a>
+      <a href="/add_device">添加设备</a>
+      <a href="/device" >设备简介</a>
+      <a href="/my">个人中心</a>
+      <button class="logout-btn" onclick="logout()">退出登录</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-bg">
+      <img src="/static/soil-bg.png" alt="背景">
+    </div>
+
+    <div class="hero-content">
+      <h1>知墒 — 土壤含水率监测系统</h1>
+      <p class="desc">基于多参数融合的电容式土壤监测 | 田间—云端—掌上全链路</p>
+
+      <div class="cards-row">
+        <div class="card">
+          <div class="card-icon blue">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4A90E2" stroke-width="2">
+              <path d="M12 2L3 10V14L12 22L21 14V10L12 2Z"></path>
+              <path d="M12 15V9"></path>
+            </svg>
+          </div>
+          <h3>我的设备</h3>
+          <p>查看实时含水率、温度与历史数据</p>
+          <a href="/device_selector"><button class="btn btn-blue">进入</button></a>
+        </div>
+
+        <div class="card">
+          <div class="card-icon green">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 6V18M6 12H18"></path>
+            </svg>
+          </div>
+          <h3>添加设备</h3>
+          <p>绑定新设备，配置名称与位置</p>
+          <a href="/add_device"><button class="btn btn-green">添加</button></a>
+        </div>
+      </div>
+
+      <div class="cards-row">
+        <div class="card">
+          <div class="card-icon blue"></div>
+          <h3>温度补偿</h3>
+          <p>NE555测湿+温度补偿，消除温漂</p>
+        </div>
+        <div class="card">
+          <div class="card-icon green"></div>
+          <h3>低功耗</h3>
+          <p>太阳能供电，野外长期部署</p>
+        </div>
+        <div class="card">
+          <div class="card-icon green"></div>
+          <h3>多土壤适配</h3>
+          <p>适配砂土/壤土/黏土，精准监测</p>
+        </div>
+      </div>
+    </div>
+  </div>
+<script>
+function logout() {
+    if(confirm('确定退出登录？')){
+        location.href = '/logout';
+    }
+}
+</script>
+</body>
+</html>
