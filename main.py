@@ -1,7 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, session
-# 替换pymysql为psycopg2
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import pymysql
 import random
 from datetime import datetime, timedelta
 import hashlib
@@ -15,17 +13,15 @@ app = Flask(__name__)
 # 密钥从环境变量读取
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
-# ==========数据库配置修改点：替换DictCursor为PostgreSQL专属RealDictCursor==========
+# 数据库配置全部取自环境变量，不再写死本地
 db_config = {
     "host": os.getenv("DB_HOST"),
     "user": os.getenv("DB_USER"),
     "password": os.getenv("DB_PASSWORD"),
     "database": os.getenv("DB_NAME"),
-    "cursor_factory": RealDictCursor
+    "cursorclass": pymysql.cursors.DictCursor
 }
 
-# ==========核心修改：注释整段自动建库函数，Render已提前创建数据库，线上无权限新建库==========
-'''
 def auto_create_database():
     try:
         conn = pymysql.connect(
@@ -43,12 +39,11 @@ def auto_create_database():
     except Exception as e:
         print("❌ 创建数据库失败", e)
 
+# 国内云服务器MySQL权限充足，可以开启自动建库
 auto_create_database()
-'''
 
-# ==========数据库连接函数替换为psycopg2==========
 def get_db():
-    return psycopg2.connect(**db_config)
+    return pymysql.connect(**db_config)
 
 def encrypt_password(pwd):
     salt = "your_random_salt"
@@ -374,7 +369,6 @@ def api_history(did):
         })
     return jsonify(out)
 
-# ==========SQL语法修改点：MySQL DATE_SUB → PostgreSQL兼容写法==========
 @app.route('/api/device/history/day/<did>')
 def api_day(did):
     if 'user_phone' not in session:
@@ -388,7 +382,7 @@ def api_day(did):
         FROM sensor_data 
         WHERE device_id=%s 
         AND user_id=(SELECT id FROM users WHERE phone=%s)
-        AND create_time >= NOW() - INTERVAL '%s DAY'
+        AND create_time >= DATE_SUB(NOW(),INTERVAL %s DAY)
         GROUP BY DATE(create_time) ORDER BY day ASC
     """, (did, session['user_phone'], days))
     rows = cur.fetchall()
@@ -415,34 +409,33 @@ def api_del(did):
     db.close()
     return jsonify(ok=True)
 
-# ==========建表语句完全兼容PostgreSQL，仅细微类型兼容，无需改动表结构==========
 def init_tables():
     db = get_db()
     cur = db.cursor()
     cur.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
+        id INT PRIMARY KEY AUTO_INCREMENT,
         phone VARCHAR(11) UNIQUE NOT NULL,
         password VARCHAR(64) NOT NULL
     )""")
     cur.execute("""
     CREATE TABLE IF NOT EXISTS user_info (
-        id SERIAL PRIMARY KEY,
+        id INT PRIMARY KEY AUTO_INCREMENT,
         user_id INT UNIQUE NOT NULL,
-        create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )""")
     cur.execute("""
     CREATE TABLE IF NOT EXISTS user_profile (
-        id SERIAL PRIMARY KEY,
+        id INT PRIMARY KEY AUTO_INCREMENT,
         user_id INT UNIQUE NOT NULL,
         nickname VARCHAR(50),
-        avatar_data TEXT,  
+        avatar_data LONGTEXT,  
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )""")
     cur.execute("""
     CREATE TABLE IF NOT EXISTS devices (
-        id SERIAL PRIMARY KEY,
+        id INT PRIMARY KEY AUTO_INCREMENT,
         device_id VARCHAR(50) NOT NULL,
         device_name VARCHAR(100),
         location VARCHAR(200),
@@ -451,20 +444,20 @@ def init_tables():
     )""")
     cur.execute("""
     CREATE TABLE IF NOT EXISTS sms_codes (
-        id SERIAL PRIMARY KEY,
+        id INT PRIMARY KEY AUTO_INCREMENT,
         phone VARCHAR(11),
         code VARCHAR(6),
-        expire_time TIMESTAMP
+        expire_time DATETIME
     )""")
     cur.execute("""
     CREATE TABLE IF NOT EXISTS sensor_data (
-        id SERIAL PRIMARY KEY,
+        id INT PRIMARY KEY AUTO_INCREMENT,
         device_id VARCHAR(50) NOT NULL,
         user_id INT NOT NULL,    
         temperature FLOAT,
         humidity FLOAT,
-        create_time TIMESTAMP DEFAULT NOW(),
-        CONSTRAINT idx_user_device UNIQUE (user_id, device_id, id)
+        create_time DATETIME DEFAULT NOW(),
+        INDEX idx_user_device (user_id, device_id)  
     )
     """)
     db.commit()
